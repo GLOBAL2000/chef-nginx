@@ -1,0 +1,12 @@
+  listen       <%= @server_name -%>:443;
+  <% if !@server_aliases.empty? -%>
+  server_name  <%= @server_aliases.join(" ") -%>;
+  <% end -%>
+
+  access_log  /var/log/nginx/<%= @server_name -%>.ssl.access.log combined;
+  client_max_body_size 10m;
+
+  ssl  on;
+  ssl_certificate <%= @ssl_cert -%>;
+  ssl_certificate_key  <%= @ssl_cert_key -%>;
+

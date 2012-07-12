@@ -1,0 +1,8 @@
+  listen       <%= @server_name -%>:80;
+  <% if !@server_aliases.empty? -%>
+  server_name  <%= @server_aliases.join(" ") -%>;
+  <% end -%>
+
+  access_log  /var/log/nginx/<%= @server_name -%>.access.log combined;
+  client_max_body_size 10m;
+

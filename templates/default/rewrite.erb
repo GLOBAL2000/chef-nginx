@@ -1,0 +1,3 @@
+  location <%= @location -%> {
+    rewrite ^ <%= @rewrite_url -%>$request_uri? permanent;
+  }
