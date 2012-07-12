@@ -40,6 +40,7 @@ define :nginx_server,
   end if params[:enable_ssl]
   
   ruby_block "nginx_site_#{server_name}" do
+    notifies :reload, "service[nginx]"
     action :nothing
     block do
       outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}", "w+")
