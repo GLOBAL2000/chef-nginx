@@ -1,3 +1,6 @@
   location <%= @location -%> {
     rewrite ^ <%= @rewrite_url -%>$request_uri? permanent;
+
+    # Custom config coming here (sorry, nice intendation gets lost here)
+    <%= @custom_config %>
   }

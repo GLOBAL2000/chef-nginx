@@ -1,4 +1,7 @@
   location <%= @location -%> {
     root   <%= @root -%>;
     index  <%= @indices.join(' ') -%>;
+
+    # Custom config coming here (sorry, nice intendation gets lost here)
+    <%= @custom_config %>
   }

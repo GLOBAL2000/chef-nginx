@@ -3,6 +3,7 @@ define :nginx_server,
   :enable_ssl => false,
   :ssl_cert => nil,
   :ssl_cert_key => nil,
+  :config_options => nil,
   :template_cookbook => nil,
   :template_source => nil do
 
@@ -11,32 +12,30 @@ define :nginx_server,
   end
 
   server_name = params[:name]
-  server_aliases = Array( params[:server_aliases] )
   tmp_dir = "#{node["nginx"]["config_tmp"]}/#{server_name}"
+
+  template_vars = Hash.new()
+  %w(ssl_cert ssl_cert_key name server_aliases config_options).each do |k|
+    template_vars[k.to_sym] = params[k.to_sym]
+  end
 
   directory "#{tmp_dir}" do
     action :create
     recursive true
   end
 
-  template "#{tmp_dir}/00_header" do
+  template "#{tmp_dir}/00" do
     cookbook params[:template_cookbook] if params[:template_cookbook]
-    source params[:template_source] if params[:template_source]
-    variables(
-              :server_name => server_name,
-              :server_aliases => server_aliases
-              )
+    source params[:template_source] ? params[:template_source] : "00_header.erb"
+    variables template_vars
+    notifies :create, "ruby_block[nginx_site_#{server_name}]"
   end
 
-  template "#{tmp_dir}/50_header_ssl" do
+  template "#{tmp_dir}/50" do
     cookbook params[:template_cookbook] if params[:template_cookbook]
-    source params[:template_source] if params[:template_source]
-    variables(
-              :server_name => server_name,
-              :server_aliases => server_aliases,
-              :ssl_cert => params[:ssl_cert],
-              :ssl_cert_key => params[:ssl_cert_key]
-              )
+    source params[:template_source] ? params[:template_source] : "50_header_ssl.erb"
+    variables template_vars
+    notifies :create, "ruby_block[nginx_site_#{server_name}]"
   end if params[:enable_ssl]
   
   ruby_block "nginx_site_#{server_name}" do
@@ -44,17 +43,17 @@ define :nginx_server,
     action :nothing
     block do
       outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}", "w+")
-      ["0-4", "5-9"].each do |range|
-        files = Dir.glob("#{tmp_dir}/[#{range}][0-9]_*").sort
+      [0..Nginx_locations.non_ssl, 50..Nginx_locations.ssl].each do |serv|
         outFile << "server {\n"
-        files.each do |inFile|
-          # Get only those which are currently in recipes. Old ones are not taken
-          check = inFile.scan(/(\d\d)_(.*)$/).flatten
-          next unless ( ( Nginx_locations.non_ssl[check[1].to_i].to_i == check[0].to_i ) || ( Nginx_locations.ssl[check[1].to_i].to_i == check[0].to_i ) || check[1] == "header" || check[1] == "header_ssl" )
 
+        files = serv.to_a.sort
+        files.map! { |e| e.to_s.rjust(2,"0") }
+        files.map! { |e| "#{tmp_dir}/#{e}" }
+        files.each do |inFile|
           f = File.open(inFile, "r")  
           f.each_line { |line| outFile << line }
           f.close
+          outFile << "\n"
         end
         outFile << "}\n"
       end
