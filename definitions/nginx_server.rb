@@ -7,7 +7,7 @@ define :nginx_server,
   :template_cookbook => nil,
   :template_source => nil do
 
-  if (params[:enable_ssl] || params[:allow_ssl_only]) && (params[:ssl_cert].nil? || params[:ssl_cert_key].nil?)
+  if params[:enable_ssl] && (params[:ssl_cert].nil? || params[:ssl_cert_key].nil?)
     raise "ssl_cert and ssl_cert_key need to be specified if ssl is enabled."
   end
 
