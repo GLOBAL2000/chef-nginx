@@ -6,5 +6,5 @@ service 'nginx' do
   not_if "/usr/sbin/nginx -t"
 end
 
-Nginx_locations.non_ssl = 0
-Nginx_locations.ssl = 50
+Nginx_locations.non_ssl = Hash.new()
+Nginx_locations.ssl = Hash.new()

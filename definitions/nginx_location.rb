@@ -23,28 +23,32 @@ define :nginx_location,
   template_vars = params[:config_options] || Hash.new()
   template_vars[:location] = params[:location]
 
-  Nginx_locations.non_ssl += 1
-  Nginx_locations.ssl += 1 if dossl
+  Nginx_locations.non_ssl[server_name.intern] = 0 if Nginx_locations.non_ssl[server_name.intern].nil?
+  Nginx_locations.ssl[server_name.intern] = 50 if Nginx_locations.ssl[server_name.intern].nil?
+
+  Nginx_locations.non_ssl[server_name.intern] += 1
+  Nginx_locations.ssl[server_name.intern] += 1 if dossl
 
   # SSL ONLY: rewrite http to https
   if !params[:allow_ssl_only]
-    template "#{tmp_dir}/#{Nginx_locations.non_ssl.to_s.rjust(2,'0')}" do
-      cookbook params[:template_cookbook] if params[:template_cookbook]
+    template "#{tmp_dir}/#{Nginx_locations.non_ssl[server_name.intern].to_s.rjust(2,'0')}" do
+      cookbook params[:template_cookbook] ? params[:template_cookbook] : "nginx"
       source "#{params[:loc_type]}.erb" || params[:template_cookbook]
       variables template_vars
       notifies :create, "ruby_block[nginx_site_#{server_name}]"
     end
   else
     template_vars[:rewrite_url] = "https://#{server_name}"
-    template "#{tmp_dir}/#{Nginx_locations.non_ssl.to_s.rjust(2,'0')}" do
+    template "#{tmp_dir}/#{Nginx_locations.non_ssl[server_name.intern].to_s.rjust(2,'0')}" do
+      cookbook "nginx"
       source "rewrite.erb"
       variables template_vars
       notifies :create, "ruby_block[nginx_site_#{server_name}]"
     end
   end
 
-  template "#{tmp_dir}/#{Nginx_locations.ssl.to_s.rjust(2,'0')}" do
-    cookbook params[:template_cookbook] if params[:template_cookbook]
+  template "#{tmp_dir}/#{Nginx_locations.ssl[server_name.intern].to_s.rjust(2,'0')}" do
+    cookbook params[:template_cookbook] ? params[:template_cookbook] : "nginx"
     source "#{params[:loc_type]}.erb" || params[:template_cookbook]
     variables template_vars
     notifies :create, "ruby_block[nginx_site_#{server_name}]"

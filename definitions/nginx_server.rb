@@ -25,14 +25,14 @@ define :nginx_server,
   end
 
   template "#{tmp_dir}/00" do
-    cookbook params[:template_cookbook] if params[:template_cookbook]
+    cookbook params[:template_cookbook] ? params[:template_cookbook] : "nginx"
     source params[:template_source] ? params[:template_source] : "00_header.erb"
     variables template_vars
     notifies :create, "ruby_block[nginx_site_#{server_name}]"
   end
 
   template "#{tmp_dir}/50" do
-    cookbook params[:template_cookbook] if params[:template_cookbook]
+    cookbook params[:template_cookbook] ? params[:template_cookbook] : "nginx"
     source params[:template_source] ? params[:template_source] : "50_header_ssl.erb"
     variables template_vars
     notifies :create, "ruby_block[nginx_site_#{server_name}]"
@@ -43,7 +43,7 @@ define :nginx_server,
     action :nothing
     block do
       outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}", "w+")
-      [0..Nginx_locations.non_ssl, 50..Nginx_locations.ssl].each do |serv|
+      [0..Nginx_locations.non_ssl[server_name.intern], 50..Nginx_locations.ssl[server_name.intern]].each do |serv|
         outFile << "server {\n"
 
         files = serv.to_a.sort
