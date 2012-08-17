@@ -1,5 +1,5 @@
 <% if @name == "default" -%>
-  listen       80 default_server
+  listen       80 default_server;
 <% else -%>
   listen       <%= @name -%>:80;
 <% end -%>
