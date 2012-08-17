@@ -42,7 +42,7 @@ define :nginx_server,
     notifies :reload, "service[nginx]"
     action :nothing
     block do
-      outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}", "w+")
+      outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}.conf", "w+")
       [0..Nginx_locations.non_ssl[server_name.intern], 50..Nginx_locations.ssl[server_name.intern]].each do |serv|
         outFile << "server {\n"
 
