@@ -1,14 +1,12 @@
 <% if @name == "default" -%>
   listen       443 default_server;
 <% else -%>
-  listen       <%= @name -%>:443;
+  listen 443;
 <% end -%>
-  <% if !@server_aliases.nil? -%>
-  server_name  <%= Array( @server_aliases ).join(" ") -%>;
-  <% end -%>
+  server_name   <%= @name %> <%= Array( @server_aliases ).join(" ") -%>;
 
-  access_log  /var/log/nginx/<%= @server_name -%>.ssl.access.log combined;
-  error_log  /var/log/nginx/<%= @server_name -%>.ssl.error.log;
+  access_log  /var/log/nginx/<%= @name -%>.ssl.access.log combined;
+  error_log  /var/log/nginx/<%= @name -%>.ssl.error.log;
 
   ssl  on;
   ssl_certificate <%= @ssl_cert -%>;
