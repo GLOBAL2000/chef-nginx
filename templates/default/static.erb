@@ -1,7 +1,9 @@
   location <%= @location -%> {
+<% if !@root.nil? -%>
     root   <%= @root -%>;
-    index  <%= @indices.join(' ') -%>;
-
+<% elsif !@alias.nil? -%>
+    alias  <%= @alias -%>;
+<% end -%>
     # Custom config coming here (sorry, nice intendation gets lost here)
     <%= @custom_config %>
   }

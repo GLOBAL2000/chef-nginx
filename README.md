@@ -6,6 +6,8 @@ This cookbook is intended to easy the use of default nginx use cases with some s
 Server Definition
 =================
 
+Specify server name "default" to define a default server.
+
 Valid Options here are:
 
 * server_aliases: Array of Server names. Will be joined with the name var to give the nginx "server_name".
@@ -63,7 +65,6 @@ nginx_location "my-url.com" do
   allow_ssl_only true
   config_options(
             :root => "/tmp/blubb",
-            :indices => ["index.htm", "index.html"]
             )
 end
 
