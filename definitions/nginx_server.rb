@@ -43,7 +43,10 @@ define :nginx_server,
     action :nothing
     block do
       outFile = File.new("#{node["nginx"]["sites_dir"]}/#{server_name}.conf", "w+")
-      [0..Nginx_locations.non_ssl[server_name.intern], 50..Nginx_locations.ssl[server_name.intern]].each do |serv|
+      ranges = Array.new
+      ranges.push 0..Nginx_locations.non_ssl[server_name.intern] if Nginx_locations.non_ssl[server_name.intern] > 0
+      ranges.push 50..Nginx_locations.ssl[server_name.intern] if Nginx_locations.ssl[server_name.intern] > 50
+      ranges.each do |serv|
         outFile << "server {\n"
 
         files = serv.to_a.sort
