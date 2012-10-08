@@ -1,5 +1,7 @@
+<% @flag = 'permanent' if @flag.nil? -%>
+<% @regex = '^' if @regex.nil? -%>
   location <%= @location -%> {
-    rewrite ^ <%= @rewrite_url -%>$request_uri? permanent;
+    rewrite <%= @regex -%> <%= @rewrite_url -%><%= '$request_uri?' unless @no_uri -%> <%= @flag -%>;
 
     # Custom config coming here (sorry, nice intendation gets lost here)
     <%= @custom_config %>
